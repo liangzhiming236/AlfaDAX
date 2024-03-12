@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <title>3D View</title>
+    <meta http-equiv="Access-Control-Allow-Origin" content="*"/>
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <!-- 3D模型展示 -->
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+    <script src="https://3Dmol.org/build/3Dmol.ui-min.js"></script>
+    <style>
+        body {
+            margin-top: 100px;
+        }
+
+        .mol-container {
+            width: 45%;
+            height: 400px;
+            position: relative;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .center-text {
+            text-align: center;
+        }
+
+        #container-01 {
+            float: left;
+            margin-top: 30px;
+        }
+
+        #container-02 {
+            float: right;
+            margin-top: 30px;
+        }
+
+    </style>
+</head>
+<body>
+    
+    <div class="center-text">
+        <p>订单编号：{{ num }}</p>
+        <p>样本编号：{{ sample }}</p>
+    </div>
+
+    <div id="container-01" class="mol-container">
+        <script>
+            window.h_pdb = "{{ h_pdb }}";
+            let viewer_01 = $3Dmol.createViewer($('#container-01')[0]);
+            viewer_01.addModel(window.h_pdb, 'pdb');
+            viewer_01.addSurface($3Dmol.SurfaceType.SES, {'opacity': 1, 'colorscheme': {'prop': 'b', 'gradient': 'rwb', 'min': 3, 'max': -3}})
+            viewer_01.setBackgroundColor(0xffffff);
+            viewer_01.zoomTo();
+            viewer_01.render();
+            viewer_01.zoom(1.2, 1000);
+            viewer_01.spin('vy');
+        </script>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <p>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp表面亲疏水基团分布，颜色越红代表越疏水，颜色越蓝代表越亲水。</p>
+    </div>
+    
+    <div id="container-02" class="mol-container">
+        <script>
+            window.c_pdb = "{{ c_pdb }}";
+            let viewer_02 = $3Dmol.createViewer($('#container-02')[0]);
+            viewer_02.addModel(window.c_pdb, 'pdb');
+            viewer_02.setStyle({'sphere': {'colorscheme': {'prop':'b','gradient': 'rwb','min':1,'max':-1}}})
+            viewer_02.setBackgroundColor(0xffffff);
+            viewer_02.zoomTo();
+            viewer_02.render();
+            viewer_02.zoom(1.2, 1000);
+            viewer_02.spin('vy');
+        </script>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <p>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp表面电荷分布，红色代表带正电，蓝色代表带负电，白色为不带电。</p>
+    </div>
+
+</body>
+</html>

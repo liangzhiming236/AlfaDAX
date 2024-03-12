@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 0;
+            margin-left: 300px;  /* 调整左侧的margin */
+            margin-right: 300px; /* 调整右侧的margin */
+        }
+
+        header {
+            background-color: rgb(27, 76, 145);
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        nav {
+            float: left;
+            width: 13%;
+            background-color: #f1f1f1;
+            padding: 15px;
+            height: 100vh; /* 使导航栏占满整个视口高度 */
+        }
+
+        section {
+            margin-left: 20%; /* 确保内容在右侧导航栏之后开始 */
+            padding: 15px;
+        }
+
+        /* 标签页样式 */
+        .tabcontent {
+            display: none;
+        }
+
+        /* 用户信息样式 */
+        .user-info {
+            font-size: 14px;
+        }
+    </style>
+
+    <style>
+        .styled-table {
+            width: 90%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 18px;
+            text-align: left;
+        }
+
+        .styled-table th,
+        .styled-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgb(221, 111, 221)a4a;
+        }
+
+        .styled-table th {
+            background-color: rgb(17, 61, 111);
+            color: white;
+            font-weight: bold;
+        }
+
+        .styled-table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .styled-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+
+<style>
+    .sequencePair {
+        display: flex;
+        flex-direction: row;
+        align-items: center; /*将对齐方式设置为 top */
+        margin-bottom: 10px; /* 可以根据需要调整间距 */
+    }
+
+    .sequencePair label,
+    .sequencePair textarea {
+        margin-right: 5px; /* 可以根据需要调整间距 */
+    }
+
+    .sequenceInput {
+        width: 100%; /* 使 textarea 撑满父容器的宽度 */
+        max-width: 300px; /* 设置最大宽度为指定值，可以根据需要调整 */
+        resize: none; /* 禁止用户调整大小 */
+    }
+
+    .add-button {
+        width: 40px; /* 设置按钮宽度 */
+        height: 40px; /* 设置按钮高度 */
+        padding: 10px 15px;
+        font-size: 16px;
+        background-color: #4CAF50; /* Green background */
+        color: white; /* White text color */
+        border: none; /* Remove borders */
+        border-radius: 5px; /* Optional: rounded corners */
+        cursor: pointer; /* Add a pointer cursor on hover */
+    }
+
+    .add-button:hover {
+        background-color: #45a049; /* Darker green on hover */
+    }
+</style>
+
+<script>
+    window.onload = function() {
+        // 从LocalStorage中获取之前保存的页签
+        var selectedTab = localStorage.getItem("selectedTab");
+        if (selectedTab) {
+            // 在页面加载后打开之前选择的页签
+            openTab(null, selectedTab);
+        }
+    };
+</script>
+
+
+</head>
+<body>
+
+<header>
+    <h1>用户中心</h1>
+</header>
+
+<nav>
+    <ul>
+        <li><a href="javascript:void(0)" onclick="openTab(event, 'personalInfo')">用户信息</a></li>
+        <li><a href="javascript:void(0)" onclick="openTab(event, 'sequenceAnalysis')">序列上传</a></li>
+        <li><a href="javascript:void(0)" onclick="openTab(event, 'analysisResults')">历史订单</a></li>
+        <li><a href="javascript:void(0)" onclick="openTab(event, 'contact_us')">联系我们</a></li>
+    </ul>
+</nav>
+
+<section>
+    <div class="tabcontent" id="personalInfo">
+        <h2>个人信息</h2>
+        <div class="user-info">
+            <!-- 其他用户信息... -->
+            {% if user %}
+                已登录
+                <p>用户： {{ user.username }}</p>
+                <p>邮箱： {{ user.email }}</p>
+                <p>公司： {{ user.company }}</p>
+                <p>剩余体验序列数：5</p>
+                <!-- <p>密码： {{ user.password }}</p> -->
+                <a href="{% url 'logout' %}">注销</a>
+            {% else %}
+                <a href="{% url 'login' %}">登录</a>
+                <hr>
+                <a href="{% url 'register' %}">注册</a>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="tabcontent" id="sequenceAnalysis">
+    <p id="introducion">
+    大湾生物的 AlfaDAX平台（DAX,  Developability Assessment）是大湾生物（GBB）开发的针对生物蛋白质分子模拟及计算机辅助药物评估优化的综合性软件系统。AlfaDAX系统集蛋白质结构预测、可视化、分析以及序列优化一体设计的综合软件，通过蛋白质结构预测、亲/疏水基团分析、正/负电荷聚集、免疫原性（人源化）、分子结构稳定性，分子对接以及亲和力分析，全面评估蛋白质分子成为可开发、安全、有效药物的潜力。在候选蛋白分子进入CMC阶段前，DAX系统帮助生物公司快速地对潜在的候选分子进行筛选及改造，减少试错成本，加速新药研发进程。
+    </p>
+
+        <form id="example_input" method="post" action="{% url 'home' %}">
+            <div>
+                <div class="sequencePair">
+                    <label >重链（示例数据）：</label>
+                    <textarea class="sequenceInput" rows="5" cols="20" readonly>>example_VH QVQLVQSGAEVRKPGASVKVSCKASGGTFSSYAISWVRQAPGQGLEWMGGIIPIFGTANYAQAFQGRVTITANESTSTAYMELSSLRSEDTAIYYCRGGYYYWYEDLWGAGTLVTVSS 
+                    </textarea>
+                    <label>轻链（示例数据）：</label>
+                    <textarea class="sequenceInput" rows="5" cols="20" readonly>>example_VL DIQMTQSPSTLSASIGDRVTITCRASEGIYHWLAWYQQKPGKAPKLLIYKASSLASGAPSRFSGSGSGTDETLTISSLQPDDFATYYCQQYSNYPLTFGGGTKLEIK
+                    </textarea>
+                </div>
+            </div>
+        </form>
+
+        <form id="sequenceForm" method="post" action="{% url 'home' %}"enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <ul>填写说明（请参考上面的示例）：
+                <li>1. 请使用>XXX_VH 标记重链，使用>XXX_VL 标记轻链，XXX替换为您的序列名称；</li>
+                <li>2. 每个输入框最多仅能填写1条序列，最多可以提供5对输入框；</li>
+                <li>3. 如果需要输入5对以上的序列，请上传fasta文件。</li>
+                <li>4. 每对序列的分析时长约为2分钟，请耐心等候。</li>
+            </ul>
+            
+            <div id="sequencesContainer">
+                <div class="sequencePair">
+                    <label for="VH1">重链：</label>
+                    <textarea id="VH1" class="sequenceInput" name="VH1" rows="5" cols="20"></textarea>
+                    <label for="VL1">轻链：</label>
+                    <textarea id="VL1" class="sequenceInput" name="VL1" rows="5" cols="20"></textarea>
+                </div>
+            </div>
+            <button type="button" class="add-button" onclick="addSequencePair()">+</button>
+            <button type="button" class="add-button" onclick="removeLastSequencePair()">-</button><br>
+            <label for="file">选择fasta文件:</label>
+            <input type="file" id="file" name="file" accept=".fasta">
+            <br>
+        
+            <br>
+            <input type="hidden" name="order_id" value="{{ order_id }}">
+            <input type="submit" value="提交">
+            <input type="reset" value="重置">
+            <button type="button" onclick="loadExampleData()">加载示例数据</button>
+            
+            <a href="javascript:void(0)" onclick="openTab(event, 'analysisResults')" style="color: orangered;"> 跳转历史订单 </a>
+        </form>
+        <a href="/media/fasta_example.fasta" download="example_fasta.fasta"><button>下载fasta模板</button></a>
+        
+        <script>
+            var pairCount = 0; 
+            function addSequencePair() {
+                
+                var container = document.getElementById('sequencesContainer');
+                var pairCount = container.getElementsByClassName('sequencePair').length;
+                
+                if (pairCount < 5) {
+                    pairCount++;
+                    var newPair = document.createElement('div');
+                    newPair.className = 'sequencePair';
+        
+                    var labelVH = document.createElement('label');
+                    labelVH.textContent = '重链：';
+                    newPair.appendChild(labelVH);
+        
+                    var textareaVH = document.createElement('textarea');
+                    textareaVH.className = 'sequenceInput';
+                    textareaVH.name = 'VH' + pairCount;
+                    textareaVH.id = 'VH' + pairCount;
+                    textareaVH.rows = 5;
+                    textareaVH.cols = 20;
+                    newPair.appendChild(textareaVH);
+
+                    // Log the id to the console
+                    console.log('Generated id for textareaVH:', textareaVH.id);
+        
+                    var labelVL = document.createElement('label');
+                    labelVL.textContent = '轻链：';
+                    newPair.appendChild(labelVL);
+        
+                    var textareaVL = document.createElement('textarea');
+                    textareaVL.className = 'sequenceInput';
+                    textareaVL.name = 'VL' + pairCount;
+                    textareaVL.id = 'VH' + pairCount;
+                    textareaVL.rows = 5;
+                    textareaVL.cols = 20;
+                    newPair.appendChild(textareaVL);
+        
+                    // var removeButton = document.createElement('button');
+                    // removeButton.type = 'button';
+                    // removeButton.className = 'add-button';
+                    // removeButton.textContent = '-';
+                    // removeButton.onclick = function () {
+                    //     removeSequencePair(this);
+                    // };
+                    // newPair.appendChild(removeButton);
+        
+                    // Insert the new pair below the last pair
+                    var lastPair = container.lastChild;
+                    container.insertBefore(newPair, lastPair.nextSibling);
+                }else {
+                    alert("禁止增加，已达到最大数量（5个）。请上传fasta文件。");
+                }
+            }
+        
+            function removeSequencePair(button) {
+                var container = document.getElementById('sequencesContainer');
+                var pair = button.parentNode;
+                container.removeChild(pair);
+            }
+
+            function removeLastSequencePair() {
+                var container = document.getElementById('sequencesContainer');
+                var lastPair = container.lastChild;
+                if (lastPair && lastPair.className === 'sequencePair') {
+                    container.removeChild(lastPair);
+                    pairCount--;  // Decrement the counter when removing a pair
+                }
+            }
+        </script>
+        
+        <script>
+            // JavaScript 函数，用于加载示例数据
+            function loadExampleData() {
+                // 示例数据
+                var exampleDataVH = ">example_VH QVQLVQSGAEVRKPGASVKVSCKASGGTFSSYAISWVRQAPGQGLEWMGGIIPIFGTANYAQAFQGRVTITANESTSTAYMELSSLRSEDTAIYYCRGGYYYWYEDLWGAGTLVTVSS";
+                var exampleDataVL = ">example_VL DIQMTQSPSTLSASIGDRVTITCRASEGIYHWLAWYQQKPGKAPKLLIYKASSLASGAPSRFSGSGSGTDETLTISSLQPDDFATYYCQQYSNYPLTFGGGTKLEIK";
+    
+                // 将示例数据填入文本框
+                document.getElementById('VH1').value = exampleDataVH;
+                document.getElementById('VL1').value = exampleDataVL;
+            }
+        </script>
+        
+                
+    </div>
+
+    <div class="tabcontent" id="analysisResults">
+        <h2>历史订单</h2>
+        <!-- 在这里添加历史订单的内容 -->
+        {% if orders %}
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>订单编号</th>
+                    <th>提交日期</th>
+                    <th>状态</th>
+                    <th>结果</th>
+                    <th>删除订单</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- {% load humanize %} {# 加载 humanize 模块，用于日期过滤器 #} -->
+                {% for order in orders %}
+                        <tr>
+                            <td>{{ order.num }}</td>
+                            <td>{{ order.create_time }}</td>
+                            <td>
+                                {% if order.state == "0" %}
+                                    计算中
+                                {% elif order.state == "1" %}
+                                    完成
+                                {% else %}
+                                    其他状态
+                                {% endif %}
+                            </td>
+                            <td>
+                                <!-- 查看结果按钮，链接到结果页面 -->
+                                <a href="#" onclick="viewStructure('{{ order.id }}', '{{ order.num }}')">查看订单</a>
+                                <script>
+                                    function viewStructure(order_id, num) {
+                                        // 在这里使用value生成动态的URL
+                                        var url = '/AlfaDAX/result/' + order_id + '/' + num;
+                                        window.open(url, '_blank'); // 在新标签页中打开URL
+                                    }
+                                </script>
+                            </td>
+                            <td>
+                                <form id="deleteForm{{ order.real_id }}" method="post" action="{% url 'delete_order' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="delete_id" value="{{ order.real_id }}">
+                                    <button type="button" onclick="confirmDelete({{ order.real_id }})">删除订单</button>
+                                </form>
+                                <script>
+                                    function confirmDelete(orderId) {
+                                        var confirmDelete = confirm("此操作不可逆。确定要删除订单吗？");
+                                
+                                        if (confirmDelete) {
+                                            // 如果用户确认删除，触发表单提交
+                                            document.getElementById("deleteForm" + orderId).submit();
+                                        }
+                                    }
+                                </script>
+                            </td>    
+                        </tr> 
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>没有历史订单。</p>
+        {% endif %}
+    </div>
+
+    <div class="tabcontent" id="contact_us">
+        <h2>联系我们</h2>
+        <p>序列评估报告解读、序列优化、序列表达等需求，请联系：</p>
+        <ul>
+            <li>电话: 4000978808/ 189 2649 7707</li>
+            <li>邮箱: bd@greatbay-bio.com</li>
+            <li>地址: 香港新界沙田白石角香港科学园二期11W大楼5楼518室</li>
+        </ul>
+
+        <form method="post" action="{% url 'contact_us' %}">
+            {% csrf_token %}
+            <h1>您的信息</h1>
+            <label for="name">姓名：</label>
+            <input type="text" id="name" name="name" value={{ user.username }} style="width: 250px; height: 30px;" required>
+            <br>
+            <label for="phone_number">电话：</label>
+            <input type="tel" id="phone_number" name="phone_number" value={{ user.phone }} style="width: 250px; height: 30px;" required>
+            <br>
+            <label for="email">邮箱：</label>
+            <input type="email" id="email" name="email" value={{ user.email }} style="width: 250px; height: 30px;" required>
+            <br>
+            <label for="message">留言：</label>
+            <input id="message" name="message" style="width: 250px; height: 100px;">
+            <br>
+            <button type="submit">提交</button>
+        </form>
+    </div>
+
+</section>
+
+<script>
+    // document.getElementById('personalInfo').style.display = 'block';
+
+    function openTab(evt, tabName) {
+        var i, tabcontent, navLinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        navLinks = document.getElementsByTagName("a");
+        for (i = 0; i < navLinks.length; i++) {
+            navLinks[i].className = navLinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+        localStorage.setItem("selectedTab", tabName);
+    }
+</script>
+
+<script>
+    // 如果在渲染时需要打开某个标签页，设置 activeTab 变量
+    var activeTab = "{% if activeTab %}{{ activeTab }}{% else %}personalInfo{% endif %}";
+
+    // 显示初始标签页
+    document.getElementById(activeTab).style.display = 'block';
+</script>
+
+</body>
+
+
+</html>

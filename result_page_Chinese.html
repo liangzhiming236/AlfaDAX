@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查看结果</title>
+    <!-- 可以在这里引入你的样式文件 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin-left: 400px;  /* 调整左侧的margin */
+            margin-right: 400px; /* 调整右侧的margin */
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .styled-table th,
+        .styled-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .styled-table th {
+            background-color: #f2f2f2;
+        }
+
+        .styled-table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .styled-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        button {
+            display: inline-block;
+            padding: 10px 15px;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #fff;
+            background-color: #007BFF;
+            border-radius: 5px;
+            border: #007BFF;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    
+
+        .annotation {
+        border: 1px solid #ccc;
+        background-color: #f8f8f8;
+        padding: 10px;
+        margin-bottom: 20px;
+        font-size: 16px; /* 调整字体大小 */
+        margin-top: 50px; /* 调整与上文的距离 */
+        }
+
+        .annotation p {
+        margin: 0;
+        }
+
+        .annotation-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+        font-size: 18px; /* 调整字体大小 */
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+    <style>
+        .styled-table {
+            /* 添加其他表格样式 */
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .styled-table th, .styled-table td {
+            /* 添加其他表头和单元格样式 */
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        /* 根据条件设置红色字体 */
+        .red-text {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<h2>查看结果</h2>
+
+{% with status_value=1 %}
+    {% if status_value == 0 %}
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">AI正在思考...</div>
+            <button class="close-button" onclick="closePage()">关闭</button>
+        </div>
+        
+        <br>
+
+        <script>
+            function closePage() {
+                window.close();
+            }
+        </script>
+    {% else %}
+
+        <p>订单编号: {{ num }}</p>
+
+        <a class="button" href="javascript:void(0);" onclick="closePage()">关闭</a>
+        <a class="button" href="{% url 'download_pdf' order_id %}" target="_blank">下载为PDF</a>
+        <a class="button" href="{% url 'contact' %}" target="_blank">联系我们</a>
+
+        <script>
+            function closePage() {
+                window.close();
+            }
+        </script>
+
+        <!-- 设置对对比值 -->
+        <table class="styled-table" id="result_table_2">
+            <caption>评估结论</caption>
+            <!-- <tr>
+                {% for key, _ in data_dicts.0.items %}
+                    {% if forloop.counter > 11 or forloop.counter == 1 %}
+                        <th>{{ key }}</th>
+                    {% endif %}
+                {% endfor %}
+                <th>查看结构</th>
+            </tr> -->
+            <tr>
+                <th>序列编号</th>
+                <th>聚集沉淀分数</th>
+                <th>黏度</th>
+                <th>非特异性结合</th>
+                <th>查看结构</th>
+            </tr>
+            <tr>
+                <th>参考值</th>
+                <th>&lt;1</th>
+                <th>&lt;1</th>
+                <th>&lt;1</th>
+                <th>-</th>
+            </tr>
+
+            {% for data_dict in data_dicts %}
+            <tr>
+                {% for _, value in data_dict.items %}
+                    {% if forloop.counter > 11 or forloop.counter == 1 %}
+                        <td style="{% if value > 1 %}color: red;{% endif %}">
+                            {{ value }}
+                        </td>
+                    {% endif %}
+                {% endfor %}
+
+                {% for _, value in data_dict.items %}
+                    {% if forloop.counter == 1 %}
+                        <th><a href="#" onclick="viewStructure('{{ order_id }}', '{{ num }}', '{{ value }}')">查看结构</a></th>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+
+        <script>
+            function viewStructure(order_id, num, sample) {
+                // 在这里使用value生成动态的URL
+                var url = '/AlfaDAX/viewer3d/' + order_id + '/' + num + '/' + sample;
+                window.open(url, '_blank'); // 在新标签页中打开URL
+            }
+        </script>
+
+        <div class="annotation">
+            
+            <p>聚集沉淀分数:分数大于1表示会产生聚集沉淀。</p>
+            <pr>
+            
+            <p>黏度:分数大于1表示浓度过高的情况下容易黏度过高。</p>
+            <pr>
+            
+            <p>非特异性结合:分数大于1容易产生非特异性结合趋势。</p>
+        </div>
+
+        <table class="styled-table" id="result_table_1">
+            <caption>计算结果</caption>
+            <!-- <tr>
+                {% for key, value in data_dicts.0.items %}
+                    {% if forloop.counter < 12 %}
+                        <th>{{ key }}</th>
+                    {% endif %}
+                {% endfor %}
+            </tr> -->
+
+            <tr>
+                <th>序列编号</th>
+                <th>蛋白质表面疏水基团分布分数</th>
+                <th>蛋白质表面局部疏水性区域</th>
+                <th>蛋白质表面正电荷区域</th>
+                <th>蛋白质表面负电荷区域</th>
+                <th>蛋白质表面电荷不对称</th>
+                <th>净电荷</th>
+                <th>正电荷与负电荷比值</th>
+                <th>等电点</th>
+                <th>人源化分</th>
+                <th>稳定性</th>
+            </tr>
+
+            <tr>
+                <th>纳米抗体参考值</th>
+                <th>&lt;15</th>
+                <th>&lt;8</th>
+                <th>&lt;0.5</th>
+                <th>&lt;0.5</th>
+                <th>-4~15</th>
+                <th>-</th>
+                <th>-</th>
+                <th>-</th>
+                <th>-</th>
+                <th>&lt;-15</th>
+            </tr>
+
+            <tr>
+                <th>传统抗体参考值</th>
+                <th>&lt;20</th>
+                <th>&lt;12</th>
+                <th>&lt;0.8</th>
+                <th>&lt;0.8</th>
+                <th>-4~15</th>
+                <th>-</th>
+                <th>-</th>
+                <th>-</th>
+                <th>-</th>
+                <th>&lt;-15</th>
+            </tr>
+
+            {% for data_dict in data_dicts %}
+            <tr>
+                {% for key, value in data_dict.items %}
+                    {% if forloop.counter < 12 %}
+                        <td class="cell"> {{ value }}</td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+
+            <script>
+                // 获取所有单元格
+                var cells = document.querySelectorAll('.cell');
+                // 遍历每个单元格，根据条件修改颜色
+                cells.forEach(function(cell, index) {
+                    // 假设这里的thresholds是在JavaScript中定义的阈值列表
+                    var antibody_type_old = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,]; //暂时写死
+                    var antibody_type = {{ flag|safe|default:"null" }};
+                    var nanometer_thresholds = [999, 15, 8, 0.5, 0.5, 15, 999, 999, 999, 999, -15];
+                    var traditional_thresholds = [999, 20, 12, 0.8, 0.8, 15, 999, 999, 999, 999, -15];
+
+                    var thresholds = [];
+
+                    for (var i = 0; i < antibody_type.length; i++) {
+                    if (antibody_type[i] === "vhh") {
+                        thresholds = thresholds.concat(nanometer_thresholds);
+                    } else if (antibody_type[i] === "fv") {
+                        thresholds = thresholds.concat(traditional_thresholds);
+                    }
+                    }
+
+                    console.log(antibody_type);
+                    console.log(thresholds);
+                                
+                    // 获取单元格的文本内容并转为数字
+                    var cellValue = parseFloat(cell.textContent);
+            
+                    // 检查是否超过阈值，超过则修改颜色
+                    if (!isNaN(cellValue) && cellValue > thresholds[index]) {
+                        cell.style.color = 'red';
+                    }
+                });
+            </script>
+
+            <!-- 单独考虑ACS小于-4的情况 -->
+            {% with data_dicts_length=data_dicts|length %}
+                <script>
+                    // 获取所有单元格
+                    var cells = document.querySelectorAll('.cell');
+                
+                    // 遍历每个单元格，根据条件修改颜色
+                    cells.forEach(function(cell, index) {
+                        // 假设这里的thresholds是在JavaScript中定义的阈值列表
+                        var thresholds = [-10e9, -10e9, -10e9, -10e9, -10e9, -4, -10e9, -10e9, -10e9, -10e9, -10e9];
+                        
+                        var n = {{ data_dicts_length }};
+
+                        // 使用 concat 方法复制数组
+                        var newArray = [].concat(...Array(n).fill(thresholds));
+
+                        // console.log(newArray);
+                                    
+                        // 获取单元格的文本内容并转为数字
+                        var cellValue = parseFloat(cell.textContent);
+                
+                        // 检查是否超过阈值，超过则修改颜色
+                        if (!isNaN(cellValue) && cellValue < newArray[index]) {
+                            cell.style.color = 'red';
+                        }
+                    });
+                </script>
+            {% endwith %}
+        </table>
+
+        <div class="annotation">
+            
+            <p>蛋白质表面疏水基团分布分数:蛋白质可能由于表面疏水基团过多而引起非特异性结合，纳米抗体分数超过15，传统抗体分数超过20容易引起非特异性结合。</p>
+            <pr>
+            
+            <p>蛋白质表面局部疏水性区域:疏水性越强，分数越高。暴露的疏水性表面可引起蛋白质的聚集，沉淀，稳定性降低等，纳米抗体分数超过8，传统抗体分数超过12容易引起聚集。</p>
+            <pr>
+            
+            <p>蛋白质表面正电荷区域:正电荷越集中，分数越高。过高的正电荷会增加蛋白质的黏度，降低稳定性等，纳米抗体分数一般低于0.5，传统抗体分数一般不超过0.8。</p>
+            <pr>
+            
+            <p>蛋白质表面负电荷区域:负电荷越集中，分数越高。过高的负电荷会增加蛋白质的黏度，降低稳定性等，纳米抗体分数一般低于0.5，传统抗体分数一般不超过0.8。</p>
+            <pr>
+            
+            <p>蛋白质表面电荷不对称:抗体可变区表面所带电荷性质分布越均匀，则分数越接近于0。分数低于-4说明正负电荷在表面分布不均匀，容易通过静电力引起蛋白自身结合，导致沉淀；分数高于15则表明抗体带有过多的正电荷（负电荷），容易引起抗体非特异性结合，导致PK变差。</p>
+            <pr>
+
+
+            <p>等电点:分子表面不带电荷的pH值。蛋白质在等电点时因没有电荷相互排斥的影响，最不稳定，溶解度最低，容易聚集析出。</p>
+            <pr>
+            <p>人源化分数:分数越高，人源化程度就越高，发生ADA的频率就越低。</p>
+            <pr>
+            
+            <p>稳定性:分数越低，代表抗体越稳定，一般分数高于-15较为不稳定。</p>
+        </div>
+
+    {% endif %}
+    {% endwith %}
+
+</body>
+</html>

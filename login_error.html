@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Error</title>
+</head>
+<body>
+    {% if error_message %}
+        <h1>登陆失败</h1>
+        <p>{{ error_message }}</p>
+        <a href="{% url 'login' %}">返回登录页面</a>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="联系我们" content="width=device-width, initial-scale=1.0">
+    <title>联系我们</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        .contact-info {
+            max-width: 400px;
+            margin: auto;
+            text-align: left;
+        }
+        .qr-code {
+            max-width: 200px;
+            margin: 20px auto; /* 居中 */
+        }
+    </style>
+</head>
+<body>
+    <div class="tabcontent" id="contact_us">
+        <h2>联系我们</h2>
+        <p>序列评估报告解读、序列优化、序列表达等需求，请联系：</p>
+        <ul>
+            <li>电话: 4000978808/ 189 2649 7707</li>
+            <li>邮箱: bd@greatbay-bio.com</li>
+            <li>地址: 香港新界沙田白石角香港科学园二期11W大楼5楼518室</li>
+        </ul>
+
+        <form method="post" action="{% url 'contact_us' %}">
+            {% csrf_token %}
+            <h1>您的信息</h1>
+            <label for="name">姓名：</label>
+            <input type="text" id="name" name="name" required>
+            <br>
+            <label for="phone_number">电话：</label>
+            <input type="tel" id="phone_number" name="phone_number" required>
+            <br>
+            <label for="email">邮箱：</label>
+            <input type="email" id="email" name="email" required>
+            <br>
+            <label for="message">留言：</label>
+            <input id="message" name="message">
+            <br>
+            <button type="submit">提交</button>
+        </form>
+    </div>
+</body>
+</html>
